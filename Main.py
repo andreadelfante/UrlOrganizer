@@ -1,9 +1,10 @@
 __author__ = "andreadelfante"
 
-import __init__
+from __init__ import *
 
 def main():
-    noconstraint_urlmap = UrlMap
+    urlMap = UrlMap(file_path="urlMap.txt")
+    groundTruth = GroundTruth(fpath="groundTruth.txt")
 
 if __name__ == '__main__':
     main()
