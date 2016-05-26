@@ -1,51 +1,26 @@
 class UrlMap:
 
     def __init__(self, file_path, separator=","):
-        self.map = dict([s.strip() for s in line.split(separator)] for line in open(file_path))
+        self.map = dict()
 
-    def get_id(self, url):
+        for line in open(file_path):
+            words = line.replace("\n", "").split(separator)
+
+            url = words[0]
+            id = words[1]
+
+            self.map[id] = url
+
+    def get_url(self, id):
         ret = ""
         try:
-            ret = self.map[url]
+            ret = self.map[id]
         except KeyError:
-            print("Url not found")
+            print("Url not found with key" + str(id))
         return ret
 
     def __getitem__(self, item):
-        return self.get_id(id=item)
-
-    def get_url(self, id):
-        for key in self.map.values():
-            if key == id:
-                return key
-
-        raise KeyError
-
-    def contains_id(self, url):
-        try:
-            self.get_id(url)
-            return True
-        except:
-            return False
-
-    def contains_url(self, id):
-        try:
-            self.get_url(id)
-            return True
-        except:
-            return False
+        return self.get_url(item)
 
     def __iter__(self):
         return self.map.__iter__()
-
-    def remove_elements_not_found(self, another_set):
-        assert isinstance(another_set, set), "another_set must be a set"
-
-        url_not_in_sequences = list(self.key_set - another_set)
-        print(len(url_not_in_sequences))
-        for url in url_not_in_sequences:
-            del self.map[url]
-
-    @property
-    def key_set(self):
-        return set(self.map)

@@ -10,15 +10,15 @@ from sklearn.manifold import TSNE
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import KMeans
 
+ground_truth_path = "dataset/illinois/ground_truth/"
+experimentation_path = "dataset/illinois/list_constraint/"
+
 def main():
-    url_map = UrlMap(file_path="dataset/urlMap.txt")
-    data = Data(file_path="dataset/normalSkipgram.txt", url_map=url_map)
+    url_map = UrlMap(file_path=experimentation_path + "urlMap.txt")
+    data = Data(file_path=experimentation_path + "normalSkipgram.txt", url_map=url_map)
 
-    url_map.remove_elements_not_found(data.id_url_set)
-
-    ground_truth = GroundTruth(file_name="dataset/groundTruth.txt", url_map=url_map)
-
-    embeddings = data.get_embeddings()
+    embeddings = data.get_embeddings
+    words = data.get_words
 
     tsne = TSNE(n_components=2)
     tsne.fit(embeddings)
@@ -35,9 +35,10 @@ def main():
     kmeans.fit(embeddings)
     kmeans_labels = kmeans.labels_
 
-    ground_truth_clusters = ground_truth.get_clusters
+    ground_truth = GroundTruth(file_name=ground_truth_path + "groundTruth.txt")
+    ground_truth_clusters = ground_truth.get_clusters(words=words)
 
-    metrics_df = pd.DataFrame(
+    metrics_df = pd.DataFrame([
         [
             # dbscan nocostraint
             metrics.homogeneity_score(ground_truth_clusters, dbscan_labels),
@@ -64,11 +65,11 @@ def main():
             metrics.adjusted_rand_score(ground_truth_clusters, kmeans_labels),
             metrics.adjusted_mutual_info_score(ground_truth_clusters, kmeans_labels),
             metrics.silhouette_score(embeddings, kmeans_labels, metric='euclidean')
-        ],
+        ]],
         index=[
             "DBSCAN",
             "HDBSCAN",
-            "K-MEANS"
+            "K-MEANS",
         ],
         columns=[
             "Homogeneity",
@@ -77,7 +78,10 @@ def main():
             "Adjusted Rand index",
             "Mutual Information",
             "Silhouette"
-        ])
+        ]
+    )
+
+    metrics_df.head() #show results
 
 if __name__ == '__main__':
     main()

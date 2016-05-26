@@ -1,19 +1,10 @@
-import os
-
-from utils import UrlMap
-
+import numpy as np
 
 class GroundTruth:
-    file_path = os.path.abspath(os.path.dirname(__file__)) + "/../../dataset/ground_truth/urlToMembership.txt"
 
     # constructor, needs the file path
-    def __init__(self, file_name=file_path, sep=",", url_map=None):
-        if url_map is None:
-            assert isinstance(url_map, UrlMap) or isinstance(url_map, dict), "url_map must be an UrlMap object or dict"
-
+    def __init__(self, file_name, sep=","):
         self.ground_truth = dict([s.strip() for s in line.split(sep)] for line in open(file_name))
-
-        self.clusters = [int(self.get_groundtruth(url_map[key])) for key in url_map]
 
     # returns the real cluster membership of a URL
     def get_groundtruth(self, url):
@@ -27,12 +18,13 @@ class GroundTruth:
         try:
             ret = self.ground_truth[url]
         except KeyError:
-            print("Url not found")
+            print("cluster not found in ground truth with url " + str(url))
         return ret
 
     def get_labelset(self):
         return set(self.ground_truth.values())
 
-    @property
-    def get_clusters(self):
-        return self.clusters
+    def get_clusters(self, words):
+        assert isinstance(words, list), "words must be a list"
+
+        return np.array([self.get_groundtruth(url) for url in words])
