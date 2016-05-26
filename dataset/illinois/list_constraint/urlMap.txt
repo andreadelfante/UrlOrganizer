@@ -16,7 +16,7 @@ http://cs.illinois.edu/news/smaragdis-receives-career-award-study-scaling-source
 http://cs.illinois.edu/news/scott-kirkwood-excels-magic-tournament-0,18
 http://cs.illinois.edu/news/nahrstedt-named-one-n2women-10-women,19
 http://cs.illinois.edu/news/three-cs-women-among-rising-stars,20
-http://cs.illinois.edu/site-mapper,21
+http://cs.illinois.edu/site-map,21
 http://cs.illinois.edu/node,22
 http://cs.illinois.edu/news/sha-receives-simon-ramo-medal,23
 http://cs.illinois.edu/news/warnow-named-fellow-acm,24
@@ -219,7 +219,7 @@ http://cs.illinois.edu/current-students/new-graduate-student-orientation/incomin
 http://cs.illinois.edu/current-students/new-graduate-student-orientation/incoming-ms,222
 http://cs.illinois.edu/current-students/new-graduate-student-orientation/incoming-professional-mcs,223
 http://cs.illinois.edu/news/sha-selected-nasa-advisory-council,224
-http://cs.illinois.edu/news/new-method-helps-mapper-species-genetic-heritage,225
+http://cs.illinois.edu/news/new-method-helps-map-species-genetic-heritage,225
 http://cs.illinois.edu/prospective-students/undergraduates/cs-degrees-offered/bs-ms-5-year-program,226
 http://cs.illinois.edu/prospective-students/undergraduates/cs-degrees-offered,227
 http://cs.illinois.edu/prospective-students/undergraduates/transfer-students,228
