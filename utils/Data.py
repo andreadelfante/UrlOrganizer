@@ -1,60 +1,68 @@
+import os
+from enum import Enum
+
 import numpy as np
+from sklearn import preprocessing
 
 from utils.UrlMap import UrlMap
 
+class Scale(Enum):
+    zscore = 1
+    minmax = 2
+    none = 3
 
-class Data:
+class UrlsEmbedding:
 
-    def __init__(self, file_path, url_map=None):
+    def __init__(self, file_path, url_map=None, scaling=Scale.zscore):
         assert isinstance(file_path, str), "file_path must be a string"
         assert url_map is None or isinstance(url_map, UrlMap), "url_map must be an UrlMap object or None"
+        self.urls, self.embeddings = self.__read_embeddings(file_path)
+        self.normalized_embeddings = self.scale(self.embeddings, scaling)
 
-        mapCode = isinstance(url_map, UrlMap)
+        if isinstance(url_map, UrlMap):
+            self.urls = [url_map[id_url] for id_url in self.urls]
 
-        self.embeddings = np.zeros((1, 1))
-        self.map = dict()
-        self.reverseMap = dict()
+    def __read_embeddings(self, filename):
+        assert os.path.isfile(filename), "the file %r does not exist" % filename
+        in_file = open(filename, "r")
+        text = in_file.readlines()
+        urls = []
+        matrix = []
 
-        number_line = 0
-        for line in open(file_path):
-            line = line.replace("\n", "")
+        for line in text:
+            tokens = line.rstrip().split(' ', 1)
+            url = tokens[0]
+            embedding = np.fromstring(tokens[1], dtype=float, sep=' ')
+            matrix.append(embedding)
+            urls.append(url)
 
-            words = line.split(" ")
-            if number_line is 0:
-                rows = int(words[0])
-                columns = int(words[1])
+        in_file.close()
+        return urls, matrix
 
-                self.embeddings = np.zeros((rows, columns))
-            else:
-                id = words[0]
-                pos = number_line - 1
+    def scale(self, embeddings, type_scale):
+        if type_scale == Scale.zscore:
+            print('scaling embeddings with z score')
+            return self.scaling_minmax(embeddings)
+        if type_scale == Scale.minmax:
+            print('scaling embeddings with minMaz normalization')
+            return self.scaling_zscore(embeddings)
+        print('No scaling executed')
+        return embeddings
 
-                if mapCode:
-                    url = url_map.get_url(id)
+    def scaling_minmax(self, embeddings):
+        min_max_scaler = preprocessing.MinMaxScaler()
+        minmax_scale = min_max_scaler.fit_transform(embeddings)
+        return minmax_scale
 
-                    self.map[url] = pos
-                    self.reverseMap[pos] = url
-                else:
-                    self.map[id] = pos
-                    self.reverseMap[pos] = id
-
-                for index in range(1, columns+1):
-                    value = np.float64(words[index])
-                    self.embeddings[pos, index - 1] = value
-            number_line += 1
-
-    @property
-    def get_pos(self, key):
-        return self.map[key]
-
-    @property
-    def get(self, position):
-        return self.reverseMap[position]
+    def scaling_zscore(self, embeddings):
+        standard_scale = preprocessing.scale(embeddings)
+        return standard_scale
 
     @property
     def get_embeddings(self):
         return self.embeddings
 
     @property
-    def get_words(self):
-        return [self.reverseMap[pos] for pos in range(0, len(self.reverseMap))]
+    def get_normalized_embeddings(self):
+        return self.normalized_embeddings
+

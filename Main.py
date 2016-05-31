@@ -1,6 +1,6 @@
 from utils.Metrics import Metrics
 from utils.Clustering import Clustering
-from utils.Data import Data
+from utils.Data import UrlsEmbedding
 from utils.UrlMap import UrlMap
 from utils.GroundTruth import GroundTruth
 
@@ -18,8 +18,8 @@ def main():
     lc_url_map = UrlMap(file_path=experimentation_path + list_constraint + "urlMap.txt")
     nc_url_map = UrlMap(file_path=experimentation_path + no_constraint + "urlMap.txt")
 
-    lc_data = Data(file_path=experimentation_path + list_constraint + embeddings_file, url_map=lc_url_map)
-    nc_data = Data(file_path=experimentation_path + no_constraint + embeddings_file, url_map=nc_url_map)
+    lc_data = UrlsEmbedding(file_path=experimentation_path + list_constraint + embeddings_file, url_map=lc_url_map)
+    nc_data = UrlsEmbedding(file_path=experimentation_path + no_constraint + embeddings_file, url_map=nc_url_map)
 
     lc_embeddings = lc_data.get_embeddings
     nc_embeddings = nc_data.get_embeddings
