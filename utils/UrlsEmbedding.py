@@ -84,7 +84,7 @@ class UrlsEmbedding:
         return estimator.fit_predict(self.normalized_embeddings)
 
     def test(self, real_labels, learned_labels, metrics='euclidean'):
-        
+
         homogeneity = metrics.homogeneity_score(real_labels, learned_labels)
         completness = metrics.completeness_score(real_labels, learned_labels)
         v_measure = metrics.v_measure_score(real_labels, learned_labels)
