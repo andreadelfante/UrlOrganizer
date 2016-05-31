@@ -1,17 +1,16 @@
 import os.path
-import numpy as np
 from enum import Enum
-from sklearn import preprocessing
-from sklearn.cluster import KMeans
-import hdbscan
-from sklearn import metrics
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
 from time import time
 
-from utils.UrlMap import UrlMap
+import hdbscan
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn import preprocessing
+from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
+import sklearn.metrics as metrics
 
-_author_ = 'fabianalanotte'
+from utils.UrlConverter import UrlConverter
 
 
 class Scale(Enum):
@@ -26,13 +25,10 @@ class Clustering_algorithm(Enum):
 
 
 class UrlsEmbedding:
-    def __init__(self, file_path, url_map, scaling=Scale.zscore):
+    def __init__(self, file_path, scaling=Scale.zscore):
         assert isinstance(file_path, str), "file_path must be a string"
-        assert url_map is None or isinstance(url_map, UrlMap), "url_map must be an UrlMap object or None"
         self.urls, self.embeddings = self.__read_embeddings(file_path)
-        self.normalized_embeddings = self.scale(self.embeddings, scaling)
-
-        self.urls = [url_map[id_url] for id_url in self.urls]
+        self.normalized_embeddings = self.__scale(embeddings=self.embeddings, type_scale=scaling)
 
     def __read_embeddings(self, filename):
         assert os.path.isfile(filename), "the file %r does not exist" % filename
@@ -56,7 +52,7 @@ class UrlsEmbedding:
             print('scaling embeddings with z score')
             return self.__scaling_minmax(embeddings)
         if type_scale == Scale.minmax:
-            print('scaling embeddings with minMaz normalization')
+            print('scaling embeddings with minMax normalization')
             return self.__scaling_zscore(embeddings)
         print('No scaling executed')
         return embeddings
@@ -83,14 +79,16 @@ class UrlsEmbedding:
         estimator = hdbscan.HDBSCAN(min_cluster_size=4)
         return estimator.fit_predict(self.normalized_embeddings)
 
-    def test(self, real_labels, learned_labels, metrics='euclidean'):
+    def test(self, url_converter, learned_labels, metric='euclidean'):
+        assert isinstance(url_converter, UrlConverter), "url_converter must be an UrlConverter object"
+        real_labels = url_converter.get_ordered_labels(listUrl=self.urls)
 
         homogeneity = metrics.homogeneity_score(real_labels, learned_labels)
         completness = metrics.completeness_score(real_labels, learned_labels)
         v_measure = metrics.v_measure_score(real_labels, learned_labels)
         adjuster_rand = metrics.adjusted_rand_score(real_labels, learned_labels)
         mutual_information = metrics.adjusted_mutual_info_score(real_labels, learned_labels)
-        silhouette = metrics.silhouette_score(self.normalized_embeddings, learned_labels, metric=metrics)
+        silhouette = metrics.silhouette_score(self.normalized_embeddings, learned_labels, metric=metric)
 
         print("Homogeneity: " + str(homogeneity))
         print("Completeness: " + str(completness))
