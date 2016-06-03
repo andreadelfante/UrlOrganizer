@@ -1,0 +1,4 @@
+http://cs.illinois.edu,3
+http://cs.illinois.edu/news,9
+http://cs.illinois.edu/news/coursera-co-founder-delivers-2015-mueller-thuns-lecture,16
+http://cs.illinois.edu/prospective-students,4

@@ -1,7 +1,7 @@
 import sys
 
 from utils.UrlConverter import UrlConverter
-from utils.UrlsEmbedding import UrlsEmbedding, Scale
+from utils.UrlsEmbedding import UrlsEmbedding, Scale, Clustering_algorithm
 
 
 def main(argv):
@@ -11,9 +11,16 @@ def main(argv):
         print('UrlConverted /path/to/urlsMap.txt /path/to/urlToMembership.txt ,')
         sys.exit(2)
     converter = UrlConverter(argv[0], argv[1], argv[2])
-    embeddings = UrlsEmbedding(file_path=argv[3], scaling=Scale.minmax)
-    learned_labels = embeddings.clustering()
-    embeddings.test(url_converter=converter, learned_labels=learned_labels)
+    embeddings = UrlsEmbedding(file_path=argv[3], scaling=Scale.zscore)
+
+    learned_labels = embeddings.clustering(type_clustering=Clustering_algorithm.HDBscan)
+    url_codes = embeddings.get_urls
+
+    triple_list = converter.get_triple_list(list_codes_url=url_codes, learned_labels=learned_labels)
+    embeddings.test_filter_urls(triple_list=triple_list)
+
+    embeddings.plot_original_data()
+    embeddings.plot_scaled_data()
 
 if __name__ == "__main__":
     # argv = sys.argv[1:]
