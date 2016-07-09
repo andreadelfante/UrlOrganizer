@@ -11,9 +11,9 @@ def main(argv):
         print('UrlConverted /path/to/urlsMap.txt /path/to/urlToMembership.txt ,')
         sys.exit(2)
     converter = UrlConverter(argv[0], argv[1], argv[2])
-    embeddings = UrlsEmbedding(file_path=argv[3], scaling=Scale.zscore)
+    embeddings = UrlsEmbedding(file_path=argv[3], scaling=Scale.none)
 
-    learned_labels = embeddings.clustering(type_clustering=Clustering_algorithm.HDBscan)
+    learned_labels = embeddings.clustering(type_clustering=Clustering_algorithm.KMeans)
     url_codes = embeddings.get_urls
 
     triple_list = converter.get_triple_list(list_codes_url=url_codes, learned_labels=learned_labels)

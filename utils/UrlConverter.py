@@ -57,3 +57,7 @@ class UrlConverter:
     @property
     def get_map(self):
         return self.__map_codeUrl_clusteringLabel
+
+    @property
+    def get_true_clusteringLabels(self):
+        return [self.__map_codeUrl_clusteringLabel[code_url] for code_url in self.__map_codeUrl_clusteringLabel.keys()]

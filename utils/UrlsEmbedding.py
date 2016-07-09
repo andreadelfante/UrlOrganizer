@@ -10,23 +10,24 @@ from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 import sklearn.metrics as metrics
 
+from utils.Metrics import Metrics
 from utils.UrlConverter import UrlConverter
 
 
 class Scale(Enum):
-    zscore = 1
-    minmax = 2
-    none = 3
+    zscore = "zscore"
+    minmax = "minmax"
+    none = "none"
 
 
 class Clustering_algorithm(Enum):
-    KMeans = 1
-    HDBscan = 2
+    KMeans = "kmeans"
+    HDBscan = "hdbscan"
 
 
 class UrlsEmbedding:
 
-    def __init__(self, file_path, scaling=Scale.zscore):
+    def __init__(self, file_path, scaling=Scale.none):
         assert isinstance(file_path, str), "file_path must be a string"
         self.__urls, self.__embeddings = self.__read_embeddings(file_path)
         self.__normalized_embeddings = self.__scale(embeddings=self.__embeddings, type_scale=scaling)
@@ -101,6 +102,8 @@ class UrlsEmbedding:
         print("Mutual Information: " + str(mutual_information))
         print("Silhouette: " + str(silhouette))
 
+        return Metrics(homogeneity, completness, v_measure, adjuster_rand, mutual_information, silhouette)
+
     def test_filter_urls(self, triple_list):
         assert isinstance(triple_list, list) or isinstance(triple_list, np.ndarray), "triple_list must be a list or a numpy array"
 
@@ -115,7 +118,7 @@ class UrlsEmbedding:
         real_labels = np.array(real_labels)
         learned_labels = np.array(learned_labels)
 
-        self.test(real_labels=real_labels,learned_labels=learned_labels)
+        return self.test(real_labels=real_labels,learned_labels=learned_labels)
 
     @property
     def get_original_embedding(self):
