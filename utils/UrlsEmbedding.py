@@ -5,13 +5,12 @@ from time import time
 import hdbscan
 import matplotlib.pyplot as plt
 import numpy as np
+import sklearn.metrics as metrics
 from sklearn import preprocessing
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
-import sklearn.metrics as metrics
 
-from utils.Metrics import Metrics
-from utils.UrlConverter import UrlConverter
+from models.Metrics import Metrics
 
 
 class Scale(Enum):
