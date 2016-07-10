@@ -13,19 +13,21 @@ class UrlConverter:
     def __generate_map_codeUrl_label(self, file_url_clusterLabel, file_url_codeUrl, separator):
         in_file1 = open(file_url_clusterLabel, "r")
         text = in_file1.readlines()
-        map1 = {line.rstrip().split(separator)[0]:line.rstrip().split(',')[1] for line in text}
+        map1 = {line.rstrip().split(separator)[0]:line.rstrip().split(separator)[1] for line in text}
         in_file1.close()
 
         in_file2 = open(file_url_codeUrl, "r")
         text = in_file2.readlines()
-        map2 = {line.rstrip().split(separator)[0]:line.rstrip().split(',')[1] for line in text}
+        map2 = {line.rstrip().split(separator)[0]:line.rstrip().split(separator)[1] for line in text}
         in_file2.close()
 
         map_code_label = {}
-        for url, code in map2.items():
-            label = map1[url]
+        #for url, code in map2.items():
+        #    label = map1[url]
+        #    map_code_label[code] = int(label)
+        for url, label in map1.items():
+            code = map2[url]
             map_code_label[code] = int(label)
-
 
         return map_code_label
 

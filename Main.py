@@ -25,8 +25,13 @@ def main(argv):
 if __name__ == "__main__":
     # argv = sys.argv[1:]
     # main(argv)
-    file_url_cluster = "dataset/illinois/ground_truth/groundTruth.txt"
-    file_url_codeUrl = "dataset/illinois/list_constraint/urlMap.txt"
-    separator = ","
-    file_embeddings = "dataset/illinois/list_constraint/normalSkipgram.txt"
+    direct = "/Users/Andrea/Desktop/cs.illinois.edu.ListConstraint.words100000.depth10/"
+    clustering = "KMEANS"
+    scaling = "None"
+
+    file_url_codeUrl = direct + "urlsMap.txt"
+    file_url_cluster = direct + "groundTruth.csv"
+    file_embeddings = direct + "embeddings_with_b.txt"
+    separator = "\t"
+
     main(argv=[file_url_cluster, file_url_codeUrl, separator, file_embeddings])
