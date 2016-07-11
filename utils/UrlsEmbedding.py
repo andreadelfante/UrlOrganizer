@@ -143,18 +143,22 @@ class UrlsEmbedding:
     def get_urls(self):
         return self.__urls
 
-    def plot_original_data(self):
+    def plot_original_data(self, file_name="original_embeddings" + str(time())):
         model = TSNE(n_components=2, random_state=0)
         np.set_printoptions(suppress=True)
         data = model.fit_transform(self.__embeddings)
         plt.plot(data[:, 0], data[:, 1], 'o')
-        output = "original_embeddings" + str(time()) + ".png"
+        output = file_name + ".png"
         plt.savefig(output)
 
-    def plot_scaled_data(self):
+        return plt
+
+    def plot_normalized_data(self, file_name="scaled_embeddings" + str(time())):
         model = TSNE(n_components=2, random_state=0)
         np.set_printoptions(suppress=True)
         data = model.fit_transform(self.__normalized_embeddings)
         plt.plot(data[:, 0], data[:, 1], 'o')
-        output = "scaled_embeddings" + str(time()) + ".png"
+        output = file_name + ".png"
         plt.savefig(output)
+
+        return plt
