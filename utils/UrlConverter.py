@@ -13,11 +13,13 @@ class UrlConverter:
     def __generate_map_codeUrl_label(self, file_url_clusterLabel, file_url_codeUrl, separator):
         in_file1 = open(file_url_clusterLabel, "r")
         text = in_file1.readlines()
+        #map1 is the groundtruth
         map1 = {line.rstrip().split(separator)[0]:line.rstrip().split(separator)[1] for line in text}
         in_file1.close()
 
         in_file2 = open(file_url_codeUrl, "r")
         text = in_file2.readlines()
+        #map2 is the {url, code}
         map2 = {line.rstrip().split(separator)[0]:line.rstrip().split(separator)[1] for line in text}
         in_file2.close()
 

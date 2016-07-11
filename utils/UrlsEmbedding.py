@@ -6,6 +6,7 @@ import hdbscan
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.metrics as metrics
+from sklearn.preprocessing import Normalizer
 from sklearn import preprocessing
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
@@ -17,6 +18,7 @@ class Scale(Enum):
     zscore = "zscore"
     minmax = "minmax"
     none = "none"
+    l2 = "l2"
 
 
 class Clustering_algorithm(Enum):
@@ -52,12 +54,15 @@ class UrlsEmbedding:
         if len(embeddings) == 0:
             return np.array([])
 
-        if type_scale == Scale.zscore:
+        if type_scale == Scale.zscore.value:
             print('scaling embeddings with z score')
             return self.__scaling_zscore(embeddings)
-        if type_scale == Scale.minmax:
+        if type_scale == Scale.minmax.value:
             print('scaling embeddings with minMax normalization')
             return self.__scaling_minmax(embeddings)
+        if type_scale == Scale.l2.value:
+            return self.__scaling_l2(embeddings)
+
         print('No scaling executed')
         return embeddings
 
@@ -70,17 +75,24 @@ class UrlsEmbedding:
         standard_scale = preprocessing.scale(embeddings)
         return standard_scale
 
+    def __scaling_l2(self, embeddings, copy=False):
+        normalizer = Normalizer(copy=copy)
+        return normalizer.fit_transform(embeddings)
+
     def clustering(self, type_clustering=Clustering_algorithm.KMeans, n_clusters=10):
-        assert isinstance(type_clustering, Clustering_algorithm), "the input parameter is not of type Clustering_algorithm"
-        if type_clustering == Clustering_algorithm.KMeans:
+        if type_clustering == Clustering_algorithm.KMeans.value:
             print("Start running KMeans")
             estimator = KMeans(init='k-means++', n_clusters=n_clusters, n_init=10)
             estimator.fit(self.__normalized_embeddings)
             return estimator.labels_
 
-        print("Start running HDBscan")
-        estimator = hdbscan.HDBSCAN(min_cluster_size=4)
-        return estimator.fit_predict(self.__normalized_embeddings)
+        if type_clustering == Clustering_algorithm.HDBscan.value:
+            print("Start running HDBscan")
+            estimator = hdbscan.HDBSCAN(min_cluster_size=5)
+            return estimator.fit_predict(self.__normalized_embeddings)
+
+        print("No selected clustering method")
+        return None
 
     def test(self, real_labels, learned_labels, metric='euclidean'):
         assert isinstance(real_labels, list) or isinstance(real_labels, np.ndarray), "real_labels must be a list or a numpy array"
