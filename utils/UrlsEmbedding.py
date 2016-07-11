@@ -80,6 +80,9 @@ class UrlsEmbedding:
         return normalizer.fit_transform(embeddings)
 
     def clustering(self, type_clustering=Clustering_algorithm.KMeans, n_clusters=10):
+        if type_clustering is Clustering_algorithm:
+            type_clustering = type_clustering.value
+
         if type_clustering == Clustering_algorithm.KMeans.value:
             print("Start running KMeans")
             estimator = KMeans(init='k-means++', n_clusters=n_clusters, n_init=10)
