@@ -48,6 +48,12 @@ class RunExperiments:
     def plot_normalized_data_no_b(self, file_name="normalized_data_no_b"):
         return self.__embeddings_no_b.plot_normalized_data(file_name=file_name)
 
+    def plot_original_data_with_b(self, file_name="original_data_with_b"):
+        return self.__embeddings_with_b.plot_original_data(file_name=file_name)
+
+    def plot_original_data_no_b(self, file_name="original_data_no_b"):
+        return self.__embeddings_no_b.plot_original_data(file_name=file_name)
+
     def get_dataframe_with_b(self):
         return self.__get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_with_b,
                                             metrics_hdbscan=self.__metrics_hdbscan_with_b)
