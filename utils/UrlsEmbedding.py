@@ -67,16 +67,16 @@ class UrlsEmbedding:
         return embeddings
 
     def __scaling_minmax(self, embeddings):
-        min_max_scaler = preprocessing.MinMaxScaler()
+        min_max_scaler = preprocessing.MinMaxScaler(copy=True)
         minmax_scale = min_max_scaler.fit_transform(embeddings)
         return minmax_scale
 
     def __scaling_zscore(self, embeddings):
-        standard_scale = preprocessing.scale(embeddings)
+        standard_scale = preprocessing.scale(embeddings, copy=True)
         return standard_scale
 
-    def __scaling_l2(self, embeddings, copy=False):
-        normalizer = Normalizer(copy=copy)
+    def __scaling_l2(self, embeddings):
+        normalizer = Normalizer(copy=True)
         return normalizer.fit_transform(embeddings)
 
     def clustering(self, type_clustering=Clustering_algorithm.KMeans, n_clusters=10):
