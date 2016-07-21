@@ -8,6 +8,10 @@ import plotly.graph_objs as go
 
 class Chart:
 
+    __window = ["2", "3", "5", "7"]
+    __db = ["100000", "500000", "1000000"]
+    __depth = ["10", "15", "20"]
+
     class Metrics(Enum):
         v_measure = 0,
         ami = 1,
@@ -16,12 +20,16 @@ class Chart:
         homogeneity = 4,
         completeness = 5
 
+    class Algorithm(Enum):
+        left_skipgram = 0,
+        normal_skipgram = 1
+
     def __init__(self, path, left_skipgram, normal_skipgram):
         self.__left_skipgram = self.__read_file(path=path + left_skipgram)
         self.__normal_skipgram = self.__read_file(path=path + normal_skipgram)
 
     def plot_linechart(self, metric, words_string, depth_string, clustering, mode='lines+markers'):
-        x = ['2', '3', '5', '7']
+        x = self.__window
 
         arrays = self.__get_metrics_for_linechart(x, metric, words_string, depth_string, clustering)
         left_y = arrays[0]
@@ -42,47 +50,175 @@ class Chart:
         )
 
         data = [trace0, trace1]
+        layout = dict(
+            title="Metric: " + str(metric) + " - words: " + words_string + " - depth: " \
+                  + depth_string + " - clustering: " + str(clustering)
+        )
 
-        return py.iplot(data)
+        fig = dict(data=data, layout=layout)
+        return py.iplot(fig)
 
-    def plot_heatchart(self):
-        #TODO: complete it
+    def plot_heatmap_window_db(self, metric, algorithm, clustering, depth_string):
+        y = self.__window
+        x = self.__db
 
-    def __get_metrics_for_linechart(self, array, m, words_string, depth_string, clustering_enum):
+        z = []
+        for el_y in y:
+            el_z = []
+
+            for el_x in x:
+                key = MetricKey(el_x, depth_string, el_y, clustering)
+                element = self.__get_value_heatmap(key, metric, algorithm)
+                el_z.append(element)
+
+            z.append(el_z)
+
+        trace = go.Heatmap(
+            x = x,
+            y = y,
+            z = z,
+            showscale=False
+        )
+
+        fig = go.Figure(data=[trace])
+        fig["layout"].update(
+            title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - depth:" +
+                  depth_string,
+            annotations=self.__get_annotations_heatmap(x, y, z),
+            autosize=True
+        )
+
+        return py.iplot(fig)
+
+    def plot_heatmap_window_depth(self, metric, algorithm, clustering, db_string):
+        y = self.__window
+        x = self.__depth
+
+        z = []
+        for el_y in y:
+            el_z = []
+
+            for el_x in x:
+                key = MetricKey(db_string, el_x, el_y, clustering)
+                element = self.__get_value_heatmap(key, metric, algorithm)
+                el_z.append(element)
+
+            z.append(el_z)
+
+        trace = go.Heatmap(
+            x = x,
+            y = y,
+            z = z,
+            showscale=False
+        )
+
+        fig = go.Figure(data=[trace])
+        fig["layout"].update(
+            title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - db: " + db_string,
+            annotations=self.__get_annotations_heatmap(x, y, z),
+            autosize=True
+        )
+
+        return py.iplot(fig)
+
+    def plot_heatmap_db_depth(self, metric, algorithm, clustering, window_string):
+        y = self.__db
+        x = self.__depth
+
+        z = []
+        z = []
+        for el_y in y:
+            el_z = []
+
+            for el_x in x:
+                key = MetricKey(el_y, el_x, window_string, clustering)
+                element = self.__get_value_heatmap(key, metric, algorithm)
+                el_z.append(element)
+
+            z.append(el_z)
+
+        trace = go.Heatmap(
+            x = x,
+            y = y,
+            z = z,
+            showscale=False
+        )
+
+        fig = go.Figure(data=[trace])
+        fig["layout"].update(
+            title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - window: " + window_string,
+            annotations=self.__get_annotations_heatmap(x, y, z),
+            autosize=True
+        )
+
+        return py.iplot(fig)
+
+    def __get_annotations_heatmap(self, x, y, z):
+        annotations = []
+        for n, row in enumerate(z):
+            for m, val in enumerate(row):
+                annotations.append(
+                    dict(
+                        text=str(z[n][m]),
+                        x=x[m], y=y[n],
+                        xref='x1', yref='y1',
+                        font=dict(color="white"),
+                        showarrow=False
+                    )
+                )
+
+        return annotations
+
+    def __get_value_heatmap(self, key, metric, algorithm):
+        elements = self.__get_metric_value(metric, key)
+
+        if algorithm == Chart.Algorithm.left_skipgram:
+            return elements[0]
+
+        return elements[1]
+
+    def __get_metrics_for_linechart(self, array, metric, words_string, depth_string, clustering_enum):
         array_left = []
         array_normal = []
 
         for element in array:
             key = MetricKey(words_string, depth_string, element, clustering_enum)
-            left = self.__left_skipgram[key.__hash__()]
-            normal = self.__normal_skipgram[key.__hash__()]
-
-            element_left = None
-            element_normal = None
-
-            if m == Chart.Metrics.v_measure:
-                element_left = left.get_v_measure
-                element_normal = normal.get_v_measure
-            elif m == Chart.Metrics.ami:
-                element_left = left.get_mutual_information
-                element_normal = normal.get_mutual_information
-            elif m == Chart.Metrics.ari:
-                element_left = left.get_adjuster_rand
-                element_normal = normal.get_adjuster_rand
-            elif m == Chart.Metrics.silhouette:
-                element_left = left.get_silhouette
-                element_normal = normal.get_silhouette
-            elif m == Chart.Metrics.homogeneity:
-                element_left = left.get_homogeneity
-                element_normal = normal.get_homogeneity
-            elif m == Chart.Metrics.completeness:
-                element_left = left.get_completeness
-                element_normal = normal.get_completeness
+            elements = self.__get_metric_value(metric, key)
+            element_left = elements[0]
+            element_normal = elements[1]
 
             array_left.append(element_left)
             array_normal.append(element_normal)
 
         return array_left, array_normal
+
+    def __get_metric_value(self, metric, key):
+        left = self.__left_skipgram[key.__hash__()]
+        normal = self.__normal_skipgram[key.__hash__()]
+
+        element_left = None
+        element_normal = None
+
+        if metric == Chart.Metrics.v_measure:
+            element_left = left.get_v_measure
+            element_normal = normal.get_v_measure
+        elif metric == Chart.Metrics.ami:
+            element_left = left.get_mutual_information
+            element_normal = normal.get_mutual_information
+        elif metric == Chart.Metrics.ari:
+            element_left = left.get_adjuster_rand
+            element_normal = normal.get_adjuster_rand
+        elif metric == Chart.Metrics.silhouette:
+            element_left = left.get_silhouette
+            element_normal = normal.get_silhouette
+        elif metric == Chart.Metrics.homogeneity:
+            element_left = left.get_homogeneity
+            element_normal = normal.get_homogeneity
+        elif metric == Chart.Metrics.completeness:
+            element_left = left.get_completeness
+            element_normal = normal.get_completeness
+
+        return element_left, element_normal
 
     def __read_file(self, path):
         in_file = open(path, "r")

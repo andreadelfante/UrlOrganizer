@@ -12,12 +12,14 @@ def main(args):
     normal_skipgram = args[2]
 
     chart = Chart(path=direct, left_skipgram=left_skipgram, normal_skipgram=normal_skipgram)
-    chart.plot_linechart(Chart.Metrics.v_measure, "100000", "10", MetricKey.Clustering.KMeans)
+    #chart.plot_linechart(Chart.Metrics.v_measure, "100000", "10", MetricKey.Clustering.KMeans)
+    chart.plot_heatmap_window_db(Chart.Metrics.v_measure, Chart.Algorithm.left_skipgram, MetricKey.Clustering.KMeans,
+                                 "20")
 
 if __name__ == "__main__":
     # args = sys.argv[1:]
     # main(args=args)
-    direct = "/Volumes/AdditionalDriveMAC/Google Drive/1) Tesi/Sperimentazioni/"
+    direct = "/Users/Andrea/Google Drive/1) Tesi/Sperimentazioni/"
     left_skipgram = "Risultati left skipgram.csv"
     normal_skipgram = "Risultati normal skipgram.csv"
 

@@ -2,6 +2,7 @@ import sys
 
 from utils.UrlConverter import UrlConverter
 from utils.UrlsEmbedding import UrlsEmbedding, Scale, Clustering_algorithm
+import numpy as np
 
 
 def main(args):
@@ -13,16 +14,21 @@ def main(args):
     converter = UrlConverter(args[0], args[1], args[2])
     embeddings = UrlsEmbedding(file_path=args[3], scaling=args[4])
 
-    learned_labels = embeddings.clustering(type_clustering=args[5])
+    original = embeddings.get_original_embedding
+    scaled = embeddings.get_scaled_embeddings
+    result = np.array_equal(original, scaled)
+
+    '''learned_labels = embeddings.clustering(type_clustering=args[5])
     url_codes = embeddings.get_urls
 
     triple_list = converter.get_triple_list(list_codes_url=url_codes, learned_labels=learned_labels)
-    embeddings.test_filter_urls(triple_list=triple_list)
+    embeddings.test_filter_urls(triple_list=triple_list)'''
 
 if __name__ == "__main__":
     # argv = sys.argv[1:]
     # main(argv)
-    direct = "/Users/Andrea/Desktop/cs.illinois.edu.ListConstraint.words100000.depth10.window2.iteractions50/"
+    direct = "/Users/Andrea/Google Drive/1) Tesi/Sperimentazioni" \
+             "/cs.illinois.edu.ListConstraint.words100000.depth10.window2.iteractions50/"
     clustering = "kmeans"
     scaling = "l2"
 
