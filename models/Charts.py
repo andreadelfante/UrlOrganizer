@@ -8,8 +8,13 @@ import plotly.graph_objs as go
 
 class Chart:
 
+    __window_labeled = ["window: 2", "window: 3", "window: 5", "window: 7"]
     __window = ["2", "3", "5", "7"]
+
+    __db_labeled = ["db: 100K", "db: 500K", "db: 1M"]
     __db = ["100000", "500000", "1000000"]
+
+    __depth_labeled = ["depth: 10", "depth: 15", "depth: 20"]
     __depth = ["10", "15", "20"]
 
     class Metrics(Enum):
@@ -36,14 +41,14 @@ class Chart:
         normal_y = arrays[1]
 
         trace0 = go.Scatter(
-            x = x,
-            y = left_y,
-            mode = mode,
-            name = str(metric) + " left skipgram"
+            x=self.__window_labeled,
+            y=left_y,
+            mode=mode,
+            name=str(metric) + " left skipgram"
         )
 
         trace1 = go.Scatter(
-            x=x,
+            x=self.__window_labeled,
             y=normal_y,
             mode=mode,
             name=str(metric) + " normal skipgram"
@@ -62,6 +67,9 @@ class Chart:
         y = self.__window
         x = self.__db
 
+        y_labeled = self.__window_labeled
+        x_labeled = self.__db_labeled
+
         z = []
         for el_y in y:
             el_z = []
@@ -74,9 +82,9 @@ class Chart:
             z.append(el_z)
 
         trace = go.Heatmap(
-            x = x,
-            y = y,
-            z = z,
+            x=x_labeled,
+            y=y_labeled,
+            z=z,
             showscale=False
         )
 
@@ -84,7 +92,7 @@ class Chart:
         fig["layout"].update(
             title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - depth:" +
                   depth_string,
-            annotations=self.__get_annotations_heatmap(x, y, z),
+            annotations=self.__get_annotations_heatmap(x_labeled, y_labeled, z),
             autosize=True
         )
 
@@ -93,6 +101,9 @@ class Chart:
     def plot_heatmap_window_depth(self, metric, algorithm, clustering, db_string):
         y = self.__window
         x = self.__depth
+
+        y_labeled = self.__window_labeled
+        x_labeled = self.__depth_labeled
 
         z = []
         for el_y in y:
@@ -106,16 +117,18 @@ class Chart:
             z.append(el_z)
 
         trace = go.Heatmap(
-            x = x,
-            y = y,
-            z = z,
+            x=x_labeled,
+            y=y_labeled,
+            z=z,
             showscale=False
         )
 
         fig = go.Figure(data=[trace])
         fig["layout"].update(
             title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - db: " + db_string,
-            annotations=self.__get_annotations_heatmap(x, y, z),
+            annotations=self.__get_annotations_heatmap(x_labeled, y_labeled, z),
+            width=700,
+            height=700,
             autosize=True
         )
 
@@ -125,7 +138,9 @@ class Chart:
         y = self.__db
         x = self.__depth
 
-        z = []
+        y_labeled = self.__db_labeled
+        x_labeled = self.__depth_labeled
+
         z = []
         for el_y in y:
             el_z = []
@@ -138,16 +153,18 @@ class Chart:
             z.append(el_z)
 
         trace = go.Heatmap(
-            x = x,
-            y = y,
-            z = z,
+            x=x_labeled,
+            y=y_labeled,
+            z=z,
             showscale=False
         )
 
         fig = go.Figure(data=[trace])
         fig["layout"].update(
             title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - window: " + window_string,
-            annotations=self.__get_annotations_heatmap(x, y, z),
+            annotations=self.__get_annotations_heatmap(x_labeled, y_labeled, z),
+            width=700,
+            height=700,
             autosize=True
         )
 
@@ -240,7 +257,8 @@ class Chart:
                 array = line.split(sep=";")
                 map[MetricKey(words, depth, window, MetricKey.Clustering.KMeans).__hash__()] = self.__get_metrics(array)
             elif i % 5 == 3:
-                map[MetricKey(words, depth, window, MetricKey.Clustering.HDBScan).__hash__()] = self.__get_metrics(array)
+                map[MetricKey(words, depth, window, MetricKey.Clustering.HDBScan).__hash__()] = self.__get_metrics(
+                    array)
 
             i += 1
 
@@ -259,7 +277,7 @@ class Chart:
             if "window" in element:
                 window = element.split(sep="window")
 
-            if words is not None and depth is not None and window is not None :
+            if words is not None and depth is not None and window is not None:
                 return words[1], depth[1], window[1]
 
         return None
@@ -288,7 +306,7 @@ class Chart:
                 vmeasure = float(element)
 
             if ami is not None and ari is not None and completeness is not None and homogeneity is not None \
-                and silhouette is not None and vmeasure is not None:
+                    and silhouette is not None and vmeasure is not None:
                 return Metrics(homogeneity=homogeneity, adjuster_rand=ari, mutual_information=ami,
                                completeness=completeness, silhouette=silhouette, v_measure=vmeasure)
 
