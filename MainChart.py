@@ -1,6 +1,6 @@
 # import sys
 
-from models.Charts import Chart
+from models.Chart import Chart
 from models.MetricKey import MetricKey
 import plotly.tools as tls
 

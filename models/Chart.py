@@ -2,6 +2,7 @@ from enum import Enum
 
 from models.MetricKey import MetricKey
 from models.Metrics import Metrics
+from plotly.tools import FigureFactory as FF
 import plotly.plotly as py
 import plotly.graph_objs as go
 
@@ -16,6 +17,9 @@ class Chart:
 
     __depth_labeled = ["depth: 10", "depth: 15", "depth: 20"]
     __depth = ["10", "15", "20"]
+
+    __palette_heatmap_general = [[0, "#F4C2C2"], [1, "#FF0000"]]
+    __palette_heatmap_silhouette = [[-1, "#F4C2C2"], [1, "#FF0000"]]
 
     class Metrics(Enum):
         v_measure = 0,
@@ -81,18 +85,17 @@ class Chart:
 
             z.append(el_z)
 
-        trace = go.Heatmap(
+        fig = FF.create_annotated_heatmap(
+            z=z,
             x=x_labeled,
             y=y_labeled,
-            z=z,
-            showscale=False
+            colorscale=self.__get_palette(metric)
         )
 
-        fig = go.Figure(data=[trace])
         fig["layout"].update(
-            title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - depth:" +
-                  depth_string,
-            annotations=self.__get_annotations_heatmap(x_labeled, y_labeled, z),
+            title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - depth:" + depth_string,
+            width=700,
+            height=700,
             autosize=True
         )
 
@@ -116,17 +119,15 @@ class Chart:
 
             z.append(el_z)
 
-        trace = go.Heatmap(
+        fig = FF.create_annotated_heatmap(
+            z=z,
             x=x_labeled,
             y=y_labeled,
-            z=z,
-            showscale=False
+            colorscale=self.__get_palette(metric)
         )
 
-        fig = go.Figure(data=[trace])
         fig["layout"].update(
             title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - db: " + db_string,
-            annotations=self.__get_annotations_heatmap(x_labeled, y_labeled, z),
             width=700,
             height=700,
             autosize=True
@@ -152,17 +153,15 @@ class Chart:
 
             z.append(el_z)
 
-        trace = go.Heatmap(
+        fig = FF.create_annotated_heatmap(
+            z=z,
             x=x_labeled,
             y=y_labeled,
-            z=z,
-            showscale=False
+            colorscale=self.__get_palette(metric)
         )
 
-        fig = go.Figure(data=[trace])
         fig["layout"].update(
             title=str(metric) + " - " + str(algorithm) + " - " + str(clustering) + " - window: " + window_string,
-            annotations=self.__get_annotations_heatmap(x_labeled, y_labeled, z),
             width=700,
             height=700,
             autosize=True
@@ -170,21 +169,10 @@ class Chart:
 
         return py.iplot(fig)
 
-    def __get_annotations_heatmap(self, x, y, z):
-        annotations = []
-        for n, row in enumerate(z):
-            for m, val in enumerate(row):
-                annotations.append(
-                    dict(
-                        text=str(z[n][m]),
-                        x=x[m], y=y[n],
-                        xref='x1', yref='y1',
-                        font=dict(color="white"),
-                        showarrow=False
-                    )
-                )
-
-        return annotations
+    def __get_palette(self, metric):
+        if metric == Chart.Metrics.silhouette:
+            return self.__palette_heatmap_silhouette
+        return self.__palette_heatmap_general
 
     def __get_value_heatmap(self, key, metric, algorithm):
         elements = self.__get_metric_value(metric, key)
