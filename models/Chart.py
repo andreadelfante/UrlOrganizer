@@ -19,7 +19,7 @@ class Chart:
     __depth = ["10", "15", "20"]
 
     __palette_heatmap_general = [[0, "#F4C2C2"], [1, "#FF0000"]]
-    __palette_heatmap_silhouette = [[-1, "#F4C2C2"], [1, "#FF0000"]]
+    __palette_heatmap_spec = [[-1, "#F4C2C2"], [1, "#FF0000"]]
 
     class Metrics(Enum):
         v_measure = 0,
@@ -37,7 +37,7 @@ class Chart:
         self.__left_skipgram = self.__read_file(path=path + left_skipgram)
         self.__normal_skipgram = self.__read_file(path=path + normal_skipgram)
 
-    def plot_linechart(self, metric, words_string, depth_string, clustering, mode='lines+markers'):
+    def plot_linechart(self, metric, words_string, depth_string, clustering):
         x = self.__window
 
         arrays = self.__get_metrics_for_linechart(x, metric, words_string, depth_string, clustering)
@@ -47,21 +47,23 @@ class Chart:
         trace0 = go.Scatter(
             x=self.__window_labeled,
             y=left_y,
-            mode=mode,
+            mode='lines+markers',
             name=str(metric) + " left skipgram"
         )
 
         trace1 = go.Scatter(
             x=self.__window_labeled,
             y=normal_y,
-            mode=mode,
+            mode='lines+markers',
             name=str(metric) + " normal skipgram"
         )
 
         data = [trace0, trace1]
         layout = dict(
             title="Metric: " + str(metric) + " - words: " + words_string + " - depth: " \
-                  + depth_string + " - clustering: " + str(clustering)
+                  + depth_string + " - clustering: " + str(clustering),
+            width=700,
+            height=700
         )
 
         fig = dict(data=data, layout=layout)
@@ -170,8 +172,8 @@ class Chart:
         return py.iplot(fig)
 
     def __get_palette(self, metric):
-        if metric == Chart.Metrics.silhouette:
-            return self.__palette_heatmap_silhouette
+        if metric == Chart.Metrics.silhouette or metric == Chart.Metrics.ari:
+            return self.__palette_heatmap_spec
         return self.__palette_heatmap_general
 
     def __get_value_heatmap(self, key, metric, algorithm):
