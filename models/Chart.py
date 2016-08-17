@@ -19,7 +19,7 @@ class Chart:
     __depth = ["10", "15", "20"]
 
     __palette_heatmap_general = [[0, "#F4C2C2"], [1, "#FF0000"]]
-    __palette_heatmap_spec = [[-1, "#F4C2C2"], [1, "#FF0000"]]
+    __palette_heatmap_spec = [[-0, "#F4C2C2"], [1, "#FF0000"]]
 
     class Metrics(Enum):
         v_measure = 0,
@@ -30,35 +30,45 @@ class Chart:
         completeness = 5
 
     class Algorithm(Enum):
-        left_skipgram = 0,
-        normal_skipgram = 1
+        left_skipgram_with_b = 0,
+        left_skipgram_no_b = 1,
+        normal_skipgram = 2
 
-    def __init__(self, path, left_skipgram, normal_skipgram):
-        self.__left_skipgram = self.__read_file(path=path + left_skipgram)
+    def __init__(self, path, left_skipgram_with_b, left_skipgram_no_b, normal_skipgram):
+        self.__left_skipgram_with_b = self.__read_file(path=path + left_skipgram_with_b)
+        self.__left_skipgram_no_b = self.__read_file(path=path + left_skipgram_no_b)
         self.__normal_skipgram = self.__read_file(path=path + normal_skipgram)
 
     def plot_linechart(self, metric, words_string, depth_string, clustering):
         x = self.__window
 
         arrays = self.__get_metrics_for_linechart(x, metric, words_string, depth_string, clustering)
-        left_y = arrays[0]
-        normal_y = arrays[1]
+        left_y_with_b = arrays[0]
+        left_y_no_b = arrays[1]
+        normal_y = arrays[2]
 
         trace0 = go.Scatter(
             x=self.__window_labeled,
-            y=left_y,
+            y=left_y_with_b,
             mode='lines+markers',
-            name=str(metric) + " left skipgram"
+            name=str(metric) + " left skipgram with b"
         )
 
         trace1 = go.Scatter(
+            x=self.__window_labeled,
+            y=left_y_no_b,
+            mode='lines+markers',
+            name=str(metric) + " left skipgram no b"
+        )
+
+        trace2 = go.Scatter(
             x=self.__window_labeled,
             y=normal_y,
             mode='lines+markers',
             name=str(metric) + " normal skipgram"
         )
 
-        data = [trace0, trace1]
+        data = [trace0, trace1, trace2]
         layout = dict(
             title="Metric: " + str(metric) + " - words: " + words_string + " - depth: " \
                   + depth_string + " - clustering: " + str(clustering),
@@ -179,53 +189,66 @@ class Chart:
     def __get_value_heatmap(self, key, metric, algorithm):
         elements = self.__get_metric_value(metric, key)
 
-        if algorithm == Chart.Algorithm.left_skipgram:
+        if algorithm == Chart.Algorithm.left_skipgram_with_b:
             return elements[0]
+        elif algorithm == Chart.Algorithm.left_skipgram_no_b:
+            return elements[1]
 
-        return elements[1]
+        return elements[2]
 
     def __get_metrics_for_linechart(self, array, metric, words_string, depth_string, clustering_enum):
-        array_left = []
+        array_left_with_b = []
+        array_left_no_b = []
         array_normal = []
 
         for element in array:
             key = MetricKey(words_string, depth_string, element, clustering_enum)
             elements = self.__get_metric_value(metric, key)
-            element_left = elements[0]
-            element_normal = elements[1]
+            element_left_with_b = elements[0]
+            element_left_no_b = elements[1]
+            element_normal = elements[2]
 
-            array_left.append(element_left)
+            array_left_with_b.append(element_left_with_b)
+            array_left_no_b.append(element_left_no_b)
             array_normal.append(element_normal)
 
-        return array_left, array_normal
+        return array_left_with_b, array_left_no_b, array_normal
 
     def __get_metric_value(self, metric, key):
-        left = self.__left_skipgram[key.__hash__()]
+        left_b = self.__left_skipgram_with_b[key.__hash__()]
+        left_no_b = self.__left_skipgram_no_b[key.__hash__()]
         normal = self.__normal_skipgram[key.__hash__()]
 
-        element_left = None
+        element_left_with_b = None
+        element_left_no_b = None
         element_normal = None
 
         if metric == Chart.Metrics.v_measure:
-            element_left = left.get_v_measure
+            element_left_with_b = left_b.get_v_measure
+            element_left_no_b = left_no_b.get_v_measure
             element_normal = normal.get_v_measure
         elif metric == Chart.Metrics.ami:
-            element_left = left.get_mutual_information
+            element_left_with_b = left_b.get_mutual_information
+            element_left_no_b = left_no_b.get_mutual_information
             element_normal = normal.get_mutual_information
         elif metric == Chart.Metrics.ari:
-            element_left = left.get_adjuster_rand
+            element_left_with_b = left_b.get_adjuster_rand
+            element_left_no_b = left_no_b.get_adjuster_rand
             element_normal = normal.get_adjuster_rand
         elif metric == Chart.Metrics.silhouette:
-            element_left = left.get_silhouette
+            element_left_with_b = left_b.get_silhouette
+            element_left_no_b = left_no_b.get_silhouette
             element_normal = normal.get_silhouette
         elif metric == Chart.Metrics.homogeneity:
-            element_left = left.get_homogeneity
+            element_left_with_b = left_b.get_homogeneity
+            element_left_no_b = left_no_b.get_homogeneity
             element_normal = normal.get_homogeneity
         elif metric == Chart.Metrics.completeness:
-            element_left = left.get_completeness
+            element_left_with_b = left_b.get_completeness
+            element_left_no_b = left_no_b.get_completeness
             element_normal = normal.get_completeness
 
-        return element_left, element_normal
+        return element_left_with_b, element_left_no_b, element_normal
 
     def __read_file(self, path):
         in_file = open(path, "r")

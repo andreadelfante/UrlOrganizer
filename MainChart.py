@@ -12,7 +12,7 @@ def main(args):
     left_skipgram = args[1]
     normal_skipgram = args[2]
 
-    chart = Chart(path=direct, left_skipgram=left_skipgram, normal_skipgram=normal_skipgram)
+    chart = Chart(path=direct, left_skipgram_with_b=left_skipgram, normal_skipgram=normal_skipgram)
     #chart.plot_linechart(Chart.Metrics.v_measure, "500000", "10", MetricKey.Clustering.KMeans)
     chart.plot_heatmap_window_db(Chart.Metrics.v_measure, Chart.Algorithm.normal_skipgram, MetricKey.Clustering.KMeans, "20")
 
