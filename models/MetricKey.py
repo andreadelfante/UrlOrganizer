@@ -11,7 +11,7 @@ class MetricKey:
         self.__words = words
         self.__depth = depth
         self.__window = window
-        self.__clustering = clustering
+        self.__clustering = clustering.value
 
     def __hash__(self):
         result = hash(self.__words) + hash(self.__depth) + hash(self.__window)

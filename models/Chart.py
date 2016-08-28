@@ -270,6 +270,7 @@ class Chart:
                 array = line.split(sep=";")
                 map[MetricKey(words, depth, window, MetricKey.Clustering.KMeans).__hash__()] = self.__get_metrics(array)
             elif i % 5 == 3:
+                array = line.split(sep=";")
                 map[MetricKey(words, depth, window, MetricKey.Clustering.HDBScan).__hash__()] = self.__get_metrics(
                     array)
 

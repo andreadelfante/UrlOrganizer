@@ -5,7 +5,7 @@ import utils.Formatter as F
 
 class RunExperiments:
 
-    def __init__(self, direct, separator="\\t", scale="none", intersect=True):
+    def __init__(self, direct, separator="\\t", scale="none", intersect=False):
         file_url_codeUrl = direct + "seedsMap.txt"
         file_url_cluster = direct + "groundTruth.csv"
         file_embeddings_with_b = direct + "embeddings_with_b.txt"
@@ -19,6 +19,8 @@ class RunExperiments:
 
         if intersect:
             self.__embeddings_normal.intersect(self.__embeddings_with_b.get_urls)
+            self.__embeddings_with_b.intersect(self.__embeddings_normal.get_urls)
+            self.__embeddings_no_b.intersect(self.__embeddings_normal.get_urls)
 
         true_labels = converter.get_true_clusteringLabels
         cluster_size = len(set(true_labels))

@@ -88,16 +88,13 @@ class UrlsEmbedding:
         :return: clustering labels (array)
         '''
 
-        if type_clustering is Clustering_algorithm:
-            type_clustering = type_clustering.value
-
-        if type_clustering == Clustering_algorithm.KMeans.value:
+        if type_clustering == Clustering_algorithm.KMeans.value or type_clustering == Clustering_algorithm.KMeans:
             print("Start running KMeans")
             estimator = KMeans(init='k-means++', n_clusters=n_clusters, n_init=10)
             estimator.fit(self.__normalized_embeddings)
             return estimator.labels_
 
-        if type_clustering == Clustering_algorithm.HDBscan.value:
+        if type_clustering == Clustering_algorithm.HDBscan.value or type_clustering == Clustering_algorithm.HDBscan:
             print("Start running HDBscan")
             estimator = hdbscan.HDBSCAN(min_cluster_size=5)
             return estimator.fit_predict(self.__normalized_embeddings)
