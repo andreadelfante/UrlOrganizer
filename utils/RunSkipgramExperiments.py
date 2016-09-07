@@ -1,9 +1,10 @@
-from utils.UrlConverter import UrlConverter
-from utils.UrlsEmbedding import UrlsEmbedding
-import pandas as pd
-import utils.Formatter as F
+from models.UrlsEmbedding import UrlsEmbedding
 
-class RunExperiments:
+import utils.Formatter as F
+from models.UrlConverter import UrlConverter
+
+
+class RunSkipgramExperiments:
 
     def __init__(self, direct, separator="\\t", scale="none", intersect=False):
         file_url_codeUrl = direct + "seedsMap.txt"
@@ -69,34 +70,13 @@ class RunExperiments:
         return self.__embeddings_normal.plot_normalized_data(file_name=file_name)
 
     def get_dataframe_with_b(self):
-        return self.__get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_with_b,
+        return F.get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_with_b,
                                             metrics_hdbscan=self.__metrics_hdbscan_with_b)
 
     def get_dataframe_no_b(self):
-        return self.__get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_no_b,
+        return F.get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_no_b,
                                             metrics_hdbscan=self.__metrics_hdbscan_no_b)
 
     def get_dataframe_normal(self):
-        return self.__get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_normal,
+        return F.get_dataframe_metrics(metrics_kmeans=self.__metrics_kmeans_normal,
                                             metrics_hdbscan=self.__metrics_hdbscan_normal)
-
-    def __get_dataframe_metrics(self, metrics_kmeans, metrics_hdbscan):
-        embedding_with_b = pd.DataFrame({
-            "Homogeneity": [F.formatFloat(metrics_kmeans.get_homogeneity),
-                            F.formatFloat(metrics_hdbscan.get_homogeneity)],
-            "Completeness": [F.formatFloat(metrics_kmeans.get_completeness),
-                             F.formatFloat(metrics_hdbscan.get_completeness)],
-            "V-Measure": [F.formatFloat(metrics_kmeans.get_v_measure),
-                          F.formatFloat(metrics_hdbscan.get_v_measure)],
-            "Adj Rand index": [F.formatFloat(metrics_kmeans.get_adjuster_rand),
-                               F.formatFloat(metrics_hdbscan.get_adjuster_rand)],
-            "Adj Mutual info": [F.formatFloat(metrics_kmeans.get_mutual_information),
-                                F.formatFloat(metrics_hdbscan.get_mutual_information)],
-            "Silhouette": [F.formatFloat(metrics_kmeans.get_silhouette),
-                           F.formatFloat(metrics_hdbscan.get_silhouette)]
-        },
-            index=["KMeans",
-                   "HDBScan"]
-        )
-
-        return embedding_with_b

@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import numpy.testing as np_testing
 
-from utils.UrlConverter import UrlConverter
+from models.UrlConverter import UrlConverter
 
 
 class UrlConverterTest(unittest.TestCase):

@@ -1,9 +1,9 @@
 import unittest
 
-import numpy.testing as np_testing
 import numpy as np
+import numpy.testing as np_testing
 
-from utils.UrlsEmbedding import UrlsEmbedding, Scale
+from models.UrlsEmbedding import UrlsEmbedding, Scale
 
 
 class UrlsEmbeddingTest(unittest.TestCase):

@@ -1,8 +1,7 @@
-import sys
-
-from utils.UrlConverter import UrlConverter
-from utils.UrlsEmbedding import UrlsEmbedding, Scale, Clustering_algorithm
 import numpy as np
+from utils.UrlsEmbedding import UrlsEmbedding
+
+from models.UrlConverter import UrlConverter
 
 
 def main(args):
