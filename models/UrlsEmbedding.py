@@ -140,7 +140,8 @@ class UrlsEmbedding:
 
         assert isinstance(triple_list, list) or isinstance(triple_list, np.ndarray), "triple_list must be a list or a numpy array"
 
-        filtered_triple_list = [element for element in triple_list if element[1] != -1]
+        filtered_triple_list = [element for element in triple_list if element[1] != -1 and element[1] != '-1']
+
         real_labels = []
         learned_labels = []
 
