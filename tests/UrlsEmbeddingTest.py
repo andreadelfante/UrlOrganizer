@@ -9,42 +9,47 @@ from models.UrlsEmbedding import UrlsEmbedding, Scale
 class UrlsEmbeddingTest(unittest.TestCase):
 
     def setUp(self):
-        self.file_paths = [
+        self.__file_paths = [
             "dataset/embeddings_first.txt",
             "dataset/embeddings_second.txt",
             "dataset/embeddings_third.txt"
         ]
 
-        self.types = [
+        self.__types = [
             float,
             int,
             None
         ]
 
-        self.file_path_for_intersection = "dataset/embeddings_for_intersection.txt"
+        self.__file_path_for_intersection = "dataset/embeddings_for_intersection.txt"
+        self.__file_path_embeddings_first_random = "dataset/embeddings_first_random.txt"
+        self.__file_path_embeddings_first_exception = "dataset/embeddings_first_exception.txt"
+        self.__file_path_embeddings_concatenate = "dataset/embeddings_concatenate.txt"
 
-        self.other_urls = [
+        self.__other_urls = [
                 np.array([]),
                 np.array(['0', '5', '8']),
                 np.array(['0', '1', '5', '7', '8'])
             ]
 
-        self.intersect_results = [
+        self.__intersect_results = [
             np.array([]),
             np.array(['0', '5', '8']),
             np.array(['0', '1', '5', '7', '8']),
         ]
 
     def tearDown(self):
-        self.file_paths = None
-        self.types = None
-        self.place_urls = None
-        self.other_urls = None
-        self.intersect_results = None
-        self.file_path_for_intersection = None
+        self.__file_paths = None
+        self.__types = None
+        self.__other_urls = None
+        self.__intersect_results = None
+        self.__file_path_for_intersection = None
+        self.__file_path_embeddings_first_random = None
+        self.__file_path_embeddings_first_exception = None
+        self.__file_path_embeddings_concatenate = None
 
     def test_scale(self):
-        file_path = self.file_paths[1]
+        file_path = self.__file_paths[1]
         urls_embedding_zscore = UrlsEmbedding(file_path=file_path, scaling=Scale.zscore)
         urls_embedding_minmax = UrlsEmbedding(file_path=file_path, scaling=Scale.minmax)
         urls_embedding_none = UrlsEmbedding(file_path=file_path, scaling=Scale.none)
@@ -79,14 +84,14 @@ class UrlsEmbeddingTest(unittest.TestCase):
         )
 
     def test_read_embeddings(self):
-        assert len(self.file_paths) == len(self.types), "file paths and types lengths are not the same"
+        assert len(self.__file_paths) == len(self.__types), "file paths and types lengths are not the same"
 
-        for i in range(len(self.file_paths)):
-            urls_embedding = UrlsEmbedding(file_path=self.file_paths[i])
+        for i in range(len(self.__file_paths)):
+            urls_embedding = UrlsEmbedding(file_path=self.__file_paths[i])
             result_urls = urls_embedding.get_urls
-            result_embeddings = urls_embedding.get_original_embedding.astype(self.types[i])
+            result_embeddings = urls_embedding.get_original_embedding.astype(self.__types[i])
 
-            file = open(self.file_paths[i])
+            file = open(self.__file_paths[i])
             lines = file.readlines()
 
             self.assertEqual(first=len(result_urls), second=len(result_embeddings),
@@ -106,15 +111,38 @@ class UrlsEmbeddingTest(unittest.TestCase):
             file.close()
 
     def test_intersect(self):
-        assert len(self.other_urls) == len(self.intersect_results), "other urls and intersect results " \
+        assert len(self.__other_urls) == len(self.__intersect_results), "other urls and intersect results " \
                                                                     "must be the same lengths"
-        for i in range(len(self.other_urls)):
-            intersect = UrlsEmbedding(self.file_path_for_intersection, Scale.l2)
-            intersect.intersect(self.other_urls[i])
+        for i in range(len(self.__other_urls)):
+            intersect = UrlsEmbedding(self.__file_path_for_intersection, Scale.l2)
+            intersect.intersect(self.__other_urls[i])
 
-            expected_result = self.intersect_results[i]
+            expected_result = self.__intersect_results[i]
             np_testing.assert_array_equal(intersect.get_urls, expected_result,
                                           err_msg="urls and intersect_results must be the same")
+
+    def test_concatenate(self):
+        file_path = self.__file_paths[0]
+
+        tests = [
+            file_path,
+            self.__file_path_embeddings_first_random,
+            self.__file_path_embeddings_first_exception
+        ]
+
+        expected_result = UrlsEmbedding(self.__file_path_embeddings_concatenate, scaling="None")
+
+        for i in range(len(tests)):
+            concatenate = UrlsEmbedding(file_path, scaling="None")
+            another = UrlsEmbedding(tests[i], scaling="None")
+
+            try:
+                concatenate.concatenate(another)
+                np_testing.assert_array_equal(concatenate.get_scaled_embeddings,
+                                              expected_result.get_scaled_embeddings,
+                                              err_msg="concatenate and expected must be the same")
+            except RuntimeError as e:
+                self.assertEqual(i, len(tests)-1, "the last test must raise an exception")
 
     def __concatenate(self, id_url, embeddings):
         result = ""

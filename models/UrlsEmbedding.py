@@ -48,16 +48,6 @@ class UrlsEmbedding:
 
         print("Original urls: " + str(len(self.__urls)))
 
-        '''
-        i = len(self.__urls)-1
-        while i >= 0:
-            if not urls.:
-                self.__urls = np.delete(self.__urls, i)
-                self.__embeddings = np.delete(self.__embeddings, i)
-                self.__normalized_embeddings = np.delete(self.__normalized_embeddings, i)
-
-            i -= 1
-        '''
         if isinstance(urls, np.ndarray):
             urls = urls.tolist()
 
@@ -79,6 +69,33 @@ class UrlsEmbedding:
         self.__normalized_embeddings = np.array(self.__normalized_embeddings)
 
         print("Intersected urls: " + str(len(self.__urls)))
+
+    def concatenate(self, another_embedding):
+        assert isinstance(another_embedding, UrlsEmbedding), "another_embedding must be an UrlsEmbedding object"
+
+        concatenate_embeddings = []
+
+        for i in range(self.__urls.size):
+            url = self.__urls[i]
+
+            found = False
+            j = 0
+            while j in range(another_embedding.__urls.size) and not found:
+                another_url = another_embedding.__urls[j]
+
+                if url == another_url:
+                    concatenate_embeddings.append(
+                        np.concatenate((self.__normalized_embeddings[i], another_embedding.__normalized_embeddings[j]))
+                    )
+                    found = True
+                else:
+                    j += 1
+
+            if not found:
+                raise RuntimeError(str(url) + " not found embedding in another_embedding to concatenate")
+
+        self.__normalized_embeddings = np.array(concatenate_embeddings)
+
 
     def clustering(self, type_clustering=Clustering_algorithm.KMeans, n_clusters=10):
         '''

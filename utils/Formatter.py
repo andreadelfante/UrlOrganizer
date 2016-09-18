@@ -1,6 +1,7 @@
 import pandas as pd
 
 from models.Metrics import Metrics
+from models.UrlsEmbedding import Clustering_algorithm
 
 
 def formatFloat(value):
@@ -33,6 +34,32 @@ def get_dataframe_metrics(metrics_kmeans, metrics_hdbscan):
     },
         index=["KMeans",
                "HDBScan"]
+    )
+
+    return result
+
+def get_dataframe_metrics_just_one(metrics, clustering_algorithm):
+    assert isinstance(metrics, Metrics), "metrics must be a Metrics object"
+    assert isinstance(clustering_algorithm, Clustering_algorithm) or isinstance(clustering_algorithm, str), \
+        "clustering_algorithm must be a string or Clustering_algorithm enum"
+
+    index = []
+    if clustering_algorithm == Clustering_algorithm.KMeans or clustering_algorithm == Clustering_algorithm.KMeans.value:
+        index.append("KMeans")
+    elif clustering_algorithm == Clustering_algorithm.HDBscan or clustering_algorithm == Clustering_algorithm.HDBscan.value:
+        index.append("HDBScan")
+    else:
+        raise RuntimeError("No valid clustering algorithm in input")
+
+    result = pd.DataFrame({
+        "Homogeneity": [formatFloat(metrics.get_homogeneity)],
+        "Completeness": [formatFloat(metrics.get_completeness)],
+        "V-Measure": [formatFloat(metrics.get_v_measure)],
+        "Adj Rand index": [formatFloat(metrics.get_adjuster_rand)],
+        "Adj Mutual info": [formatFloat(metrics.get_mutual_information)],
+        "Silhouette": [formatFloat(metrics.get_silhouette)]
+    },
+        index=index
     )
 
     return result
