@@ -14,9 +14,9 @@ class RunSkipgramExperiments:
         file_embeddings_normal = direct + "embeddings_normal.txt"
 
         converter = UrlConverter(file_url_cluster, file_url_codeUrl, separator)
-        self.__embeddings_with_b = UrlsEmbedding(file_embeddings_with_b, scaling=scale)
-        self.__embeddings_no_b = UrlsEmbedding(file_embeddings_no_b, scaling=scale)
-        self.__embeddings_normal = UrlsEmbedding(file_embeddings_normal, scaling=scale)
+        self.__embeddings_with_b = UrlsEmbedding.init_from_embeddings(file_embeddings_with_b, scaling=scale)
+        self.__embeddings_no_b = UrlsEmbedding.init_from_embeddings(file_embeddings_no_b, scaling=scale)
+        self.__embeddings_normal = UrlsEmbedding.init_from_embeddings(file_embeddings_normal, scaling=scale)
 
         if intersect:
             self.__embeddings_normal.intersect(self.__embeddings_with_b.get_urls)

@@ -6,6 +6,7 @@ import hdbscan
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn.metrics as metrics
+import utils.TfIdf as tfidf
 from sklearn.preprocessing import Normalizer
 from sklearn import preprocessing
 from sklearn.cluster import KMeans
@@ -28,16 +29,60 @@ class Clustering_algorithm(Enum):
 
 class UrlsEmbedding:
 
-    def __init__(self, file_path, scaling=Scale.none):
+    def __init__(self, urls, embeddings, scaling=Scale.none):
         '''
-        Create a new instance of UrlsEmbedding
-        :param file_path: a string containing the file path
+        Create new instance of UrlsEmbedding with url and embedding array
+        :param urls: a numpy array of urls
+        :param embeddings: a numpy array of embeddings
+        '''
+        assert isinstance(urls, np.ndarray), "urls must be a numpy array"
+        assert isinstance(embeddings, np.ndarray), "embeddings must be a numpy array"
+        assert urls.shape[0] == embeddings.shape[0], "urls and embeddings size must be the same"
+
+        self.__urls = urls
+        self.__embeddings = embeddings
+        self.__normalized_embeddings = self.__scale(self.__embeddings, scaling)
+
+    @classmethod
+    def init_from_vertex(cls, file_path, dimension_reduction, scaling=Scale.none):
+        '''
+        Create a new instance of UrlsEmbedding from vertex.txt and fit text with tfidf
+        :param file_path: a string containing the file path of vertex.txt
         :param scaling: an enum (class Scale) for scaling.
         '''
-
         assert isinstance(file_path, str), "file_path must be a string"
-        self.__urls, self.__embeddings = self.__read_embeddings(file_path)
-        self.__normalized_embeddings = self.__scale(embeddings=self.__embeddings, type_scale=scaling)
+        urls, embeddings = tfidf.read_vertex_file(file_path)
+        matrix = tfidf.fit(embeddings, dimension_reduction)
+        return UrlsEmbedding(urls, matrix, scaling)
+
+    @classmethod
+    def init_from_embeddings(cls, file_path, scaling=Scale.none):
+        '''
+        Create a new instance of UrlsEmbedding from embeddings file txt
+        :param file_path: a string containing the file path of embeddings file txt
+        :param scaling: an enum (class Scale) for scaling.
+        '''
+        assert isinstance(file_path, str), "file_path must be a string"
+        urls, embeddings = UrlsEmbedding.__read_embeddings(file_path)
+        return UrlsEmbedding(urls, embeddings, scaling)
+
+    @classmethod
+    def __read_embeddings(cls, filename):
+        assert os.path.isfile(filename), "the file %r does not exist" % filename
+        in_file = open(filename, "r")
+        text = in_file.readlines()
+        urls = []
+        matrix = []
+
+        for line in text:
+            tokens = line.rstrip().split(' ', 1)
+            url = tokens[0]
+            embedding = np.fromstring(tokens[1], dtype=float, sep=' ')
+            matrix.append(embedding)
+            urls.append(url)
+
+        in_file.close()
+        return np.array(urls), np.array(matrix)
 
     def intersect(self, urls):
         '''
@@ -71,6 +116,11 @@ class UrlsEmbedding:
         print("Intersected urls: " + str(len(self.__urls)))
 
     def concatenate(self, another_embedding):
+        '''
+        Perform a concatenation from this and another embedding
+        :param another_embedding: another UrlsEmbedding object
+        :return:
+        '''
         assert isinstance(another_embedding, UrlsEmbedding), "another_embedding must be an UrlsEmbedding object"
 
         concatenate_embeddings = []
@@ -95,7 +145,6 @@ class UrlsEmbedding:
                 raise RuntimeError(str(url) + " not found embedding in another_embedding to concatenate")
 
         self.__normalized_embeddings = np.array(concatenate_embeddings)
-
 
     def clustering(self, type_clustering=Clustering_algorithm.KMeans, n_clusters=10):
         '''
@@ -128,8 +177,10 @@ class UrlsEmbedding:
         :return: a Metrics object containing the results
         '''
 
-        assert isinstance(real_labels, list) or isinstance(real_labels, np.ndarray), "real_labels must be a list or a numpy array"
-        assert isinstance(learned_labels, list) or isinstance(learned_labels, np.ndarray), "learned_labels must be a list or a numpy array"
+        assert isinstance(real_labels, list) or isinstance(real_labels,
+                                                           np.ndarray), "real_labels must be a list or a numpy array"
+        assert isinstance(learned_labels, list) or isinstance(learned_labels,
+                                                              np.ndarray), "learned_labels must be a list or a numpy array"
         assert len(real_labels) == len(learned_labels), "real_labels and learned_labels must have the same length"
 
         homogeneity = metrics.homogeneity_score(real_labels, learned_labels)
@@ -155,7 +206,8 @@ class UrlsEmbedding:
         :return: a Metrics object containing the results
         '''
 
-        assert isinstance(triple_list, list) or isinstance(triple_list, np.ndarray), "triple_list must be a list or a numpy array"
+        assert isinstance(triple_list, list) or isinstance(triple_list,
+                                                           np.ndarray), "triple_list must be a list or a numpy array"
 
         filtered_triple_list = [element for element in triple_list if element[1] != -1 and element[1] != '-1']
 
@@ -169,7 +221,7 @@ class UrlsEmbedding:
         real_labels = np.array(real_labels)
         learned_labels = np.array(learned_labels)
 
-        return self.test(real_labels=real_labels,learned_labels=learned_labels)
+        return self.test(real_labels=real_labels, learned_labels=learned_labels)
 
     @property
     def get_original_embedding(self):
@@ -225,23 +277,6 @@ class UrlsEmbedding:
         plt.savefig(output)
 
         return plt
-
-    def __read_embeddings(self, filename):
-        assert os.path.isfile(filename), "the file %r does not exist" % filename
-        in_file = open(filename, "r")
-        text = in_file.readlines()
-        urls = []
-        matrix = []
-
-        for line in text:
-            tokens = line.rstrip().split(' ', 1)
-            url = tokens[0]
-            embedding = np.fromstring(tokens[1], dtype=float, sep=' ')
-            matrix.append(embedding)
-            urls.append(url)
-
-        in_file.close()
-        return np.array(urls), np.array(matrix)
 
     def __scale(self, embeddings, type_scale):
         if len(embeddings) == 0:

@@ -22,9 +22,9 @@ class RunLineExperiments:
         file_embeddings_line_second = direct + "embeddings_line_second.txt"
 
         converter = UrlConverter(file_url_cluster, file_url_codeUrl, separator)
-        self.__embeddings_normal_skipgram = UrlsEmbedding(file_embeddings_normal_skipgram, scale)
-        self.__embeddings_line_first = UrlsEmbedding(file_embeddings_line_first, scale)
-        self.__embeddings_line_second = UrlsEmbedding(file_embeddings_line_second, scale)
+        self.__embeddings_normal_skipgram = UrlsEmbedding.init_from_embeddings(file_embeddings_normal_skipgram, scale)
+        self.__embeddings_line_first = UrlsEmbedding.init_from_embeddings(file_embeddings_line_first, scale)
+        self.__embeddings_line_second = UrlsEmbedding.init_from_embeddings(file_embeddings_line_second, scale)
 
         if intersect:
             self.__embeddings_line_first.intersect(self.__embeddings_normal_skipgram.get_urls)

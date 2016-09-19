@@ -2,6 +2,7 @@ from models.UrlConverter import UrlConverter
 from models.UrlsEmbedding import UrlsEmbedding
 
 import utils.Formatter as F
+import utils.TfIdf as tfidf
 
 class RunConcatenateExperiment:
 
@@ -18,6 +19,8 @@ class RunConcatenateExperiment:
                  depth_best_normal,
                  iteractions_normal,
                  clustering,
+                 use_tfidf=False,
+                 dimension_deduction=100,
                  separator="\\t",
                  scale="none",
                  intersect=False):
@@ -39,9 +42,15 @@ class RunConcatenateExperiment:
         file_embeddings_doc2vec = direct + "embeddings_doc2vec.txt"
 
         converter = UrlConverter(file_url_cluster, file_url_codeUrl, separator)
-        self.__embeddings_left_with_b = UrlsEmbedding(file_embeddings_left_with_b, scaling=scale)
-        self.__embeddings_normal = UrlsEmbedding(file_embeddings_normal, scaling=scale)
-        self.__embeddings_doc2vec = UrlsEmbedding(file_embeddings_doc2vec, scaling=scale)
+        self.__embeddings_left_with_b = UrlsEmbedding.init_from_embeddings(file_embeddings_left_with_b, scaling=scale)
+        self.__embeddings_normal = UrlsEmbedding.init_from_embeddings(file_embeddings_normal, scaling=scale)
+
+        if use_tfidf:
+            print("use tfidf")
+            self.__embeddings_content = UrlsEmbedding.init_from_vertex(direct + "vertex.txt", dimension_deduction, scale)
+        else:
+            print("use doc2vec")
+            self.__embeddings_content = UrlsEmbedding.init_from_embeddings(file_embeddings_doc2vec, scaling=scale)
 
         if intersect:
             print("Intersecting...")
@@ -49,8 +58,8 @@ class RunConcatenateExperiment:
             self.__embeddings_left_with_b.intersect(self.__embeddings_normal.get_urls)
 
         print("Concatenating...")
-        self.__embeddings_left_with_b.concatenate(self.__embeddings_doc2vec)
-        self.__embeddings_normal.concatenate(self.__embeddings_doc2vec)
+        self.__embeddings_left_with_b.concatenate(self.__embeddings_content)
+        self.__embeddings_normal.concatenate(self.__embeddings_content)
 
         true_labels = converter.get_true_clusteringLabels
         cluster_size = len(set(true_labels))

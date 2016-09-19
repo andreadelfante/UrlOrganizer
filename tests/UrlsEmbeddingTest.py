@@ -50,9 +50,9 @@ class UrlsEmbeddingTest(unittest.TestCase):
 
     def test_scale(self):
         file_path = self.__file_paths[1]
-        urls_embedding_zscore = UrlsEmbedding(file_path=file_path, scaling=Scale.zscore)
-        urls_embedding_minmax = UrlsEmbedding(file_path=file_path, scaling=Scale.minmax)
-        urls_embedding_none = UrlsEmbedding(file_path=file_path, scaling=Scale.none)
+        urls_embedding_zscore = UrlsEmbedding.init_from_embeddings(file_path, Scale.zscore)
+        urls_embedding_minmax = UrlsEmbedding.init_from_embeddings(file_path, Scale.minmax)
+        urls_embedding_none = UrlsEmbedding.init_from_embeddings(file_path, Scale.none)
 
         original_embedding_none = urls_embedding_none.get_original_embedding
         scaled_embedding_none = urls_embedding_none.get_scaled_embeddings
@@ -87,7 +87,7 @@ class UrlsEmbeddingTest(unittest.TestCase):
         assert len(self.__file_paths) == len(self.__types), "file paths and types lengths are not the same"
 
         for i in range(len(self.__file_paths)):
-            urls_embedding = UrlsEmbedding(file_path=self.__file_paths[i])
+            urls_embedding = UrlsEmbedding.init_from_embeddings(self.__file_paths[i])
             result_urls = urls_embedding.get_urls
             result_embeddings = urls_embedding.get_original_embedding.astype(self.__types[i])
 
@@ -114,7 +114,7 @@ class UrlsEmbeddingTest(unittest.TestCase):
         assert len(self.__other_urls) == len(self.__intersect_results), "other urls and intersect results " \
                                                                     "must be the same lengths"
         for i in range(len(self.__other_urls)):
-            intersect = UrlsEmbedding(self.__file_path_for_intersection, Scale.l2)
+            intersect = UrlsEmbedding.init_from_embeddings(self.__file_path_for_intersection, Scale.l2)
             intersect.intersect(self.__other_urls[i])
 
             expected_result = self.__intersect_results[i]
@@ -130,11 +130,11 @@ class UrlsEmbeddingTest(unittest.TestCase):
             self.__file_path_embeddings_first_exception
         ]
 
-        expected_result = UrlsEmbedding(self.__file_path_embeddings_concatenate, scaling="None")
+        expected_result = UrlsEmbedding.init_from_embeddings(self.__file_path_embeddings_concatenate, "None")
 
         for i in range(len(tests)):
-            concatenate = UrlsEmbedding(file_path, scaling="None")
-            another = UrlsEmbedding(tests[i], scaling="None")
+            concatenate = UrlsEmbedding.init_from_embeddings(file_path, "None")
+            another = UrlsEmbedding.init_from_embeddings(tests[i], "None")
 
             try:
                 concatenate.concatenate(another)
