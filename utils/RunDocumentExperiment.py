@@ -1,9 +1,9 @@
-import utils.Formatter as F
 from models.UrlConverter import UrlConverter
 from models.UrlsEmbedding import UrlsEmbedding
 
+import utils.Formatter as F
 
-class RunConcatenateExperiment:
+class RunDocumentExperiment:
 
     def __init__(self,
                  direct,
@@ -19,10 +19,10 @@ class RunConcatenateExperiment:
                  iteractions_normal,
                  clustering,
                  use_tfidf=False,
-                 dimension_deduction=100,
                  separator="\\t",
                  scale="none",
-                 intersect=False):
+                 intersect=False,
+                 dimension_deduction=100):
         direct = direct + site + "/" + type_site + "/"
 
         file_url_codeUrl = direct + "seedsMap.txt"
@@ -38,6 +38,7 @@ class RunConcatenateExperiment:
                                  ".depth" + depth_best_normal + \
                                  ".window" + window_best_normal + \
                                  ".iteractions" + iteractions_normal + "/embeddings_normal.txt"
+
         file_embeddings_doc2vec = direct + "embeddings_doc2vec.txt"
 
         converter = UrlConverter(file_url_cluster, file_url_codeUrl, separator)
@@ -46,7 +47,8 @@ class RunConcatenateExperiment:
 
         if use_tfidf:
             print("use tfidf")
-            self.__embeddings_content = UrlsEmbedding.init_from_vertex(direct + "vertex.txt", dimension_deduction, scale)
+            self.__embeddings_content = UrlsEmbedding.init_from_vertex(direct + "vertex.txt", dimension_deduction,
+                                                                       scale)
         else:
             print("use doc2vec")
             self.__embeddings_content = UrlsEmbedding.init_from_embeddings(file_embeddings_doc2vec, scaling=scale)
@@ -56,38 +58,26 @@ class RunConcatenateExperiment:
             self.__embeddings_normal.intersect(self.__embeddings_left_with_b.get_urls)
             self.__embeddings_left_with_b.intersect(self.__embeddings_normal.get_urls)
 
-        print("Concatenating...")
-        self.__embeddings_left_with_b.concatenate(self.__embeddings_content)
-        self.__embeddings_normal.concatenate(self.__embeddings_content)
+            print(str(len(self.__embeddings_normal.get_urls)) + "==" + str(len(self.__embeddings_left_with_b.get_urls)))
+
+            # utilizza solo url in comune tra i due
+            self.__embeddings_content.intersect(self.__embeddings_normal.get_urls)
+            print("length content: " + str(len(self.__embeddings_content.get_urls)))
 
         true_labels = converter.get_true_clusteringLabels
         cluster_size = len(set(true_labels))
 
-        learned_labels_left_with_b = self.__embeddings_left_with_b.clustering(type_clustering=clustering,
-                                                                           n_clusters=cluster_size)
-        learned_labels_normal = self.__embeddings_normal.clustering(type_clustering=clustering,
-                                                                           n_clusters=cluster_size)
+        learned_labels = self.__embeddings_content.clustering(type_clustering=clustering, n_clusters=cluster_size)
 
-        url_codes_left_with_b = self.__embeddings_left_with_b.get_urls
-        url_codes_normal = self.__embeddings_normal.get_urls
+        url_codes_content = self.__embeddings_content.get_urls
 
-        triple_list_left_with_b = converter.get_triple_list(list_codes_url=url_codes_left_with_b,
-                                                            learned_labels=learned_labels_left_with_b)
-        triple_list_normal = converter.get_triple_list(list_codes_url=url_codes_normal,
-                                                       learned_labels=learned_labels_normal)
+        triple_list_content = converter.get_triple_list(url_codes_content, learned_labels)
 
-        self.__metrics_left_with_b = self.__embeddings_left_with_b.test_filter_urls(triple_list_left_with_b)
-        self.__metrics_normal = self.__embeddings_normal.test_filter_urls(triple_list_normal)
+        self.__metrics_content = self.__embeddings_content.test_filter_urls(triple_list_content)
         self.__clustering = clustering
 
-    def get_dataframe_left_with_b_doc2vec(self):
-        return F.get_dataframe_metrics_just_one(self.__metrics_left_with_b, self.__clustering)
+    def get_dataframe_content(self):
+        return F.get_dataframe_metrics_just_one(self.__metrics_content, self.__clustering)
 
-    def get_dataframe_normal_doc2vec(self):
-        return F.get_dataframe_metrics_just_one(self.__metrics_normal, self.__clustering)
-
-    def plot_normalized_normal_doc2vec(self, file_name):
+    def plot_normalized_content(self, file_name):
         return self.__embeddings_normal.plot_normalized_data(file_name)
-
-    def plot_normalized_left_with_b_doc2vec(self, file_name):
-        return self.__embeddings_left_with_b.plot_normalized_data(file_name)
