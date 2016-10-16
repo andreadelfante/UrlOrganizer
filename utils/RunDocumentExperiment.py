@@ -8,16 +8,7 @@ class RunDocumentExperiment:
     def __init__(self,
                  direct,
                  site,
-                 type_site,
-                 db_best_left_with_b,
-                 window_best_left_with_b,
-                 depth_best_left_with_b,
-                 iteractions_left_with_b,
-                 db_best_normal,
-                 window_best_normal,
-                 depth_best_normal,
-                 iteractions_normal,
-                 clustering,
+                 type_site,clustering,
                  use_tfidf=False,
                  separator="\\t",
                  scale="none",
@@ -28,22 +19,10 @@ class RunDocumentExperiment:
         file_url_codeUrl = direct + "seedsMap.txt"
         file_url_cluster = direct + "groundTruth.csv"
 
-        file_embeddings_left_with_b = direct + site + "." + type_site + \
-                                      ".words" + db_best_left_with_b + \
-                                      ".depth" + depth_best_left_with_b + \
-                                      ".window" + window_best_left_with_b + \
-                                      ".iteractions" + iteractions_left_with_b + "/embeddings_with_b.txt"
-        file_embeddings_normal = direct + site + "." + type_site + \
-                                 ".words" + db_best_normal + \
-                                 ".depth" + depth_best_normal + \
-                                 ".window" + window_best_normal + \
-                                 ".iteractions" + iteractions_normal + "/embeddings_normal.txt"
-
         file_embeddings_doc2vec = direct + "embeddings_doc2vec.txt"
 
         converter = UrlConverter(file_url_cluster, file_url_codeUrl, separator)
-        self.__embeddings_left_with_b = UrlsEmbedding.init_from_embeddings(file_embeddings_left_with_b, scaling=scale)
-        self.__embeddings_normal = UrlsEmbedding.init_from_embeddings(file_embeddings_normal, scaling=scale)
+
 
         if use_tfidf:
             print("use tfidf")
@@ -55,13 +34,7 @@ class RunDocumentExperiment:
 
         if intersect:
             print("Intersecting...")
-            self.__embeddings_normal.intersect(self.__embeddings_left_with_b.get_urls)
-            self.__embeddings_left_with_b.intersect(self.__embeddings_normal.get_urls)
-
-            print(str(len(self.__embeddings_normal.get_urls)) + "==" + str(len(self.__embeddings_left_with_b.get_urls)))
-
-            # utilizza solo url in comune tra i due
-            self.__embeddings_content.intersect(self.__embeddings_normal.get_urls)
+            self.__embeddings_content.intersect(list(converter.get_map.keys()))
             print("length content: " + str(len(self.__embeddings_content.get_urls)))
 
         true_labels = converter.get_true_clusteringLabels
@@ -80,4 +53,4 @@ class RunDocumentExperiment:
         return F.get_dataframe_metrics_just_one(self.__metrics_content, self.__clustering)
 
     def plot_normalized_content(self, file_name):
-        return self.__embeddings_normal.plot_normalized_data(file_name)
+        return self.__embeddings_content.plot_normalized_data(file_name)
